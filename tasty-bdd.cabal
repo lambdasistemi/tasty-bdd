@@ -1,80 +1,82 @@
-name:               tasty-bdd
-version:            0.1.0.0
-synopsis: bdd tests language and tasty provider
-description:
-    * A type constrained language to express
-      *  *Given* as ordered preconditions or
-      *  *GivenAndAfter* as oredered preconditions with reversed order of teardown actions (sort of resource management)
-      *  One only *When* to introduce a last precondition and catch it's output to be fed to
-      *  Some *Then* tests that will receive the output of *When*
-    * Support for do notation via free monad for composing _givens_ and _thens_ 
-    * One monad independent pure interpreter
-    * One driver for the great [tasty](https://github.com/feuerbach/tasty) test library,  monad parametrized
-    * Support for [tasty-fail-fast](https://hackage.haskell.org/package/tasty-fail-fast) strategy flag which will not execute the teardown actions of the failed test
-    * A sophisticated form of value introspection to show the differences on equality failure from [tree-diff](https://github.com/phadej/tree-diffdifftree) package 
-    * Recursive test decorators to prepend or append action to all the tests inside a test tree
-homepage:           https://github.com/paolino/bdd#readme
-license:            BSD3
-license-file:       LICENSE
-author:             Paolo Veronelli, Pavlo Kerestey
-maintainer:         paolo.veronelli@gmail.com
-copyright:          2017 Paolo Veronelli
-category:           Test
-build-type:         Simple
-extra-source-files: README.md
-cabal-version:      >=1.10
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 3d09fd3039a4f97cb691e80b9e53f939dca22e70237df9634d3c473be516a0de
+
+name:           tasty-bdd
+version:        0.1.0.0
+synopsis:       BDD tests language and tasty provider
+description:    https://gitlab.com/devs.global.de/tasty-bdd/-/blob/master/README.md
+category:       Test
+homepage:       https://gitlab.com/devs.global.de/tasty-bdd
+author:         Paolo Veronelli, Pavlo Kerestey
+maintainer:     paolo.veronelli@gmail.com
+copyright:      2017 Paolo Veronelli
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
 
 library
-    hs-source-dirs:   src
-    exposed-modules:  Test.Tasty.Bdd
-                    , Test.BDD.Language
-                    , Test.BDD.LanguageFree
-                    , System.CaptureStdout
-    ghc-options:      -Wall
-    build-depends:    base >= 4.7 && <5
-                    , exceptions
-                    , free
-                    , HUnit
-                    , microlens
-                    , microlens-th
-                    , mtl
-                    , pretty-show
-                    , pretty
-                    , tagged
-                    , tasty
-                    , tasty-fail-fast
-                    , tasty-hunit
-                    , transformers
-                    , tree-diff
-                    , text
-                    , temporary
-    default-language: Haskell2010
+  exposed-modules:
+      Test.Tasty.Bdd
+      Test.BDD.Language
+      Test.BDD.LanguageFree
+      System.CaptureStdout
+  other-modules:
+      Paths_tasty_bdd
+  hs-source-dirs:
+      src
+  default-extensions: OverloadedStrings
+  ghc-options: -Wall
+  build-depends:
+      HUnit
+    , base >=4.7 && <5
+    , exceptions
+    , free
+    , microlens
+    , microlens-th
+    , mtl
+    , pretty
+    , pretty-show
+    , tagged
+    , tasty
+    , tasty-fail-fast
+    , tasty-hunit
+    , temporary
+    , text
+    , transformers
+    , tree-diff
+  default-language: Haskell2010
 
 test-suite test
-    type: exitcode-stdio-1.0
-    main-is: Main.hs
-    default-extensions: OverloadedStrings
-    build-depends:    base >= 4.7 && <5
-                    , exceptions
-                    , aeson
-                    , aeson-qq
-                    , HUnit
-                    , mtl
-                    , tasty
-                    , tasty-hunit
-                    , tasty-bdd
-                    , tasty-fail-fast
-                    , tasty-expected-failure
-                    , transformers
-                    , temporary
-                    , qm-interpolated-string
-                    , text
-                    , regex-posix
-    hs-source-dirs:   tests
-    ghc-options:      -Wall
-    default-extensions: OverloadedStrings
-    default-language: Haskell2010
-
-source-repository head
-    type:             git
-    location:         https://github.com/paolino/tasty-bdd
+  type: exitcode-stdio-1.0
+  main-is: Main.hs
+  other-modules:
+      Paths_tasty_bdd
+  hs-source-dirs:
+      tests
+  default-extensions: OverloadedStrings
+  ghc-options: -Wall
+  build-depends:
+      HUnit
+    , aeson
+    , aeson-qq
+    , base >=4.7 && <5
+    , exceptions
+    , mtl
+    , qm-interpolated-string
+    , regex-posix
+    , tasty
+    , tasty-bdd
+    , tasty-expected-failure
+    , tasty-fail-fast
+    , tasty-hunit
+    , temporary
+    , text
+    , transformers
+  default-language: Haskell2010
