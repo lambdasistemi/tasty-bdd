@@ -22,7 +22,7 @@
 
 ## Example
 
-```
+```haskell
 import Test.Tasty.Bdd
 
 tests :: TestTree
