@@ -1,5 +1,3 @@
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -10,7 +8,7 @@
 
 -- |
 -- Module    :  Test.Tasty.Bdd
--- Copyright :  (c) Paolo Veronelli, Pavlo Kerestey 2017
+-- Copyright :  (c) Paolo Veronelli, Pavlo Kerestey 2017-2020
 -- License   :  All rights reserved
 -- Maintainer:  paolo.veronelli@gmail.com
 -- Stability :  experimental
@@ -200,6 +198,7 @@ onEach op (TestGroup n ts) = TestGroup n $ (map $ onEach op) ts
 onEach op (WithResource spec rf) = WithResource spec $ onEach op . rf
 onEach op (AskOptions rf) = AskOptions $ onEach op . rf
 onEach op (PlusTestOptions g t) = PlusTestOptions g $ onEach op t
+onEach op (After x y t) = After x y $ onEach op t
 
 -- | recursively append an action
 afterEach :: IO () -> TestTree -> TestTree
