@@ -20,7 +20,7 @@
 
 [Behavior Driven Development](https://en.wikipedia.org/wiki/Behavior-driven_development) is a software development process that emerged from test-driven development (TDD) and is based on principles of [Hoare Logic](https://en.wikipedia.org/wiki/Hoare_logic). The process requires a strict structure of the tests - {Given} When {Then} - to make them understandable.
 
-## Example
+## Example with raw DSL
 
 ```haskell
 import Test.Tasty.Bdd
@@ -36,4 +36,19 @@ tests = testBdd "Test sequence"
     $ When (print "Action returning" >> return ([1..10]++[100..106]) :: IO [Int])
     $ Then (@?= ([1..10]++[700..706]))
     $ End
+```
+
+## Extract with free monad 
+
+```haskell
+test_produce_values :: IO [TestTree]
+test_produce_values = do
+  map (beforeEach cleanElectricityAccounting) <$> testBehaviors do
+    bdd "read samples" $ do
+      sf <- given openTestSalesforce
+      givenSamples $ do
+        sample uuid1 "2019" 0
+      when_
+        do runAccounting sf $ accountingProduceValues "2019" t2020
+        do then_ $ \result -> length result @?= 1
 ```
