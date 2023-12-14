@@ -3,17 +3,10 @@
 # For more information, please see the documentation at:
 #   https://docs.haskellstack.org/en/stable/lock_files
 
-packages:
-- completed:
-    hackage: tasty-fail-fast-0.0.3@sha256:0a5a850d7fb5aecb9058d847fa1e634357c2b83bad4b31e41ed1ba6c2d2f1828,1803
-    pantry-tree:
-      size: 452
-      sha256: 6f6cc1cb1fe6316c72db69e8215ef214adbaa7166cfbad69a9a2169f4fe98d3f
-  original:
-    hackage: tasty-fail-fast-0.0.3
+packages: []
 snapshots:
 - completed:
-    size: 532379
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/16/8.yaml
-    sha256: 2ad3210d2ad35f3176005d68369a18e4d984517bfaa2caade76f28ed0b2e0521
-  original: lts-16.8
+    sha256: 7d4b649cf368f9076d8aa049aa44efe58950971d105892734e9957b2a26a2186
+    size: 640060
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/21/21.yaml
+  original: lts-21.21
