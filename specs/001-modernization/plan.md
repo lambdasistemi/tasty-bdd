@@ -3,8 +3,8 @@
 ## Status
 
 Completed: original GitHub builds on GHC 9.12.3 and all six tests pass; GitLab comparison found nine descendant commits and source parity with published 0.1.0.1; branch fast-forwarded to GitLab history.
-Current: final review and branch CI. Cabal/Nix, documentation and Spec Kit setup are implemented; eight tests and the example pass, including from the rebuilt source archive. Two compiled mutations confirm dependency traversal and failed-prerequisite coverage.
-External setup: wiki first page needs a signed-in maintainer. The organization Default runner group includes this public repository and has ten online nixos runners; CI selects nixos after transfer. The operator subsequently authorized the transfer; it completed with repository ID 110524936 preserved. Package publication remains outside execution scope.
+Current: the modernization branch is pushed for PR review and live CI. Cabal/Nix, documentation and Spec Kit setup are implemented; eight tests and the example pass, including from the rebuilt source archive. Two compiled mutations confirm dependency traversal and failed-prerequisite coverage.
+External setup: the operator initialized the wiki and its Home, sidebar and September logbook are published. The organization Default runner group includes this public repository and has ten online nixos runners; CI selects nixos after transfer. The operator subsequently authorized the transfer; it completed with repository ID 110524936 preserved. Package publication remains outside execution scope.
 
 ## Contributor story
 

@@ -25,4 +25,6 @@
 - [x] Write transfer runbook covering GitHub redirects, GitLab and Hackage links, settings and recovery.
 - [x] Run fresh local gates and effective negative controls.
 - [x] Validate source archive and documented example.
-- [ ] Push the reviewed branch and record CI status and remaining operator steps.
+- [x] Push the reviewed branch and record CI status and remaining operator steps.
+
+The modernization is pushed to [PR 3](https://github.com/lambdasistemi/tasty-bdd/pull/3). Local checkout/archive gates pass; GitHub CI is tracked on the PR and is not implied green by local results. The authorized ownership transfer is complete and the wiki is published. PR acceptance and any future version/publication decision remain maintainer steps.
