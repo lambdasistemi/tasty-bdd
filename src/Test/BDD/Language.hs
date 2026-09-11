@@ -41,8 +41,11 @@ module Test.BDD.Language
     , BDDTesting
     , BDDTest (..)
     , TestContext (..)
+      -- | Lens for the ordered preparation actions and their teardowns.
     , context
+      -- | Lens for the action whose result is supplied to the assertions.
     , when
+      -- | Lens for the assertions applied to the scenario result.
     , tests
     , interpret
     , Phase (..)
@@ -87,11 +90,11 @@ data Language m t q a where
 -- | Result of this module interpreter
 data BDDTest m t q = BDDTest
     { _tests :: [t -> m q]
-    -- ^ tests from 't'
+    -- ^ tests from @t@
     , _context :: [TestContext m]
     -- ^ test context
     , _when :: m t
-    -- ^ when action to compute 't'
+    -- ^ when action to compute @t@
     }
 
 makeLenses ''BDDTest

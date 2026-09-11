@@ -11,7 +11,7 @@ flowchart LR
   Maintainer -->|separate future decision| Release
 ```
 
-Run `nix develop -c just sdist` to create a local archive. The current source still uses the already-published version 0.1.0.1; this archive is a review artifact and must not be uploaded under that version. Choose a new version and validate package metadata in a separate release change.
+Run `nix develop -c just sdist` to create a local archive. The prepared candidate is version 0.1.0.2. Run `cabal check` and rebuild the unpacked archive before publication. Generate the Hackage documentation bundle with `cabal haddock lib:tasty-bdd --haddock-for-hackage -O0`. The source archive and Haddock bundle are review artifacts; preparing them does not publish a package.
 
 Repository ownership does not change Hackage ownership or existing package descriptions. Hackage 0.1.0.1 currently points to GitLab. A GitHub transfer alone will not update those links. Existing Hackage tarballs remain historical artifacts.
 

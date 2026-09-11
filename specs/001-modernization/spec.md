@@ -4,7 +4,7 @@
 
 As a contributor, I can clone the project, enter its reproducible development environment, build the library and run its examples and tests with GHC 9.12.3. An invalid change causes a failing check rather than a misleading green workflow.
 
-As an existing user, I retain the published BDD API and behavior, including recursive decorators over dependent Tasty tests. Modernization does not introduce a provider change or a new release.
+As an existing user, I retain the published BDD API and behavior, including recursive decorators over dependent Tasty tests. Modernization preserves the providers. The operator subsequently requested a Hackage-level release preparation: prepare version 0.1.0.2 with source and Haddock archives, without publication, then stop.
 
 As a maintainer, I have readable documentation, a Spec Kit constitution and task record, a draft pull request, CI and review rules, and a concrete transfer runbook that accounts for live Hackage metadata.
 

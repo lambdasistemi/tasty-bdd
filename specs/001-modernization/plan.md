@@ -24,7 +24,7 @@ flowchart TD
 | Choice | Alternative | Reason |
 |---|---|---|
 | Fast-forward the work branch through GitLab | Reimplement its patch | Preserve attribution and already-published behavior. |
-| Handwritten Cabal 3.0, version remains 0.1.0.1 | Keep Stack/hpack or bump version now | One package description; no release requested. |
+| Handwritten Cabal 3.0, release candidate 0.1.0.2 | Keep Stack/hpack or reuse a published version | One package description; the operator requested release preparation after modernization. |
 | haskell.nix with GHC 9.12.3, pinned dependencies | Permissive bounds alone | Compilation and test evidence must be reproducible. |
 | Executed sandbox checks and matching apps | Script derivations masquerading as checks | Green means the check ran. |
 | Preserve master | Rename during ownership transfer | Avoid unrelated branch/link churn. |

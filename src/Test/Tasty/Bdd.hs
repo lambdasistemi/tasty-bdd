@@ -178,7 +178,7 @@ matching inequality
     :: (ToExpr a, Eq a, Typeable a, MonadThrow m) => m a -> a -> b -> m ()
 f ^?/= t = const $ f >>= (@?/= t)
 
--- | interpret 'Bdd' sentence to a single 'TestTree'
+-- | interpret a 'Language' scenario to a single 'TestTree'
 testBehavior
     :: (MonadIO m, TestableMonad m, Typeable t)
     => String
