@@ -9,8 +9,8 @@ description:
 
 category:           Test
 stability:          experimental
-homepage:           https://github.com/paolino/tasty-bdd
-bug-reports:        https://github.com/paolino/tasty-bdd/issues
+homepage:           https://github.com/lambdasistemi/tasty-bdd
+bug-reports:        https://github.com/lambdasistemi/tasty-bdd/issues
 author:             Paolo Veronelli, Pavlo Kerestey
 maintainer:         paolo.veronelli@gmail.com
 copyright:          2017 Paolo Veronelli
@@ -105,4 +105,4 @@ test-suite example
 
 source-repository head
   type:     git
-  location: https://github.com/paolino/tasty-bdd
+  location: https://github.com/lambdasistemi/tasty-bdd

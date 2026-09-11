@@ -1,4 +1,4 @@
-# Modernize development and prepare the repository move
+# Modernize development and transfer the repository
 
 ## User stories
 
@@ -13,7 +13,7 @@ flowchart LR
   Contributor -->|clone and develop| Source
   Source -->|build and verify| Checks
   Checks -->|evidence| Review
-  Review -->|operator executes later| Transfer
+  Review -->|operator authorizes transfer| Transfer
   Hackage -->|published metadata links| Source
 ```
 
@@ -26,7 +26,7 @@ flowchart LR
 - Spec Kit is initialized with a filled constitution and consistent spec, plan and tasks. README, user stories, architecture and development docs contain usable examples and diagrams.
 - Configure applicable new-repository conventions on the existing GitHub repository; record any settings requiring operator interaction or the future organization transfer.
 - Provide release preparation without uploading to Hackage or cutting a release. Published 0.1.0.1 and GitHub 0.1.0.0 cannot be treated as interchangeable package artifacts.
-- Prepare the ownership-transfer procedure, verification and recovery steps in the lane handoffs. Do not execute the transfer.
+- Prepare the ownership-transfer procedure, verification and recovery steps in the lane handoffs. The operator subsequently authorized execution; transfer the existing repository and verify identity, redirects and settings.
 
 ## Constraints
 

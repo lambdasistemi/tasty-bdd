@@ -1,7 +1,7 @@
 site_name: tasty-bdd
 site_description: Typed Given/When/Then scenarios for Haskell and Tasty
-site_url: https://paolino.github.io/tasty-bdd/
-repo_url: https://github.com/paolino/tasty-bdd
+site_url: https://lambdasistemi.github.io/tasty-bdd/
+repo_url: https://github.com/lambdasistemi/tasty-bdd
 edit_uri: edit/master/docs/
 nav:
   - Home: index.md

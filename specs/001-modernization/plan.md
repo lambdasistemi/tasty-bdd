@@ -4,7 +4,7 @@
 
 Completed: original GitHub builds on GHC 9.12.3 and all six tests pass; GitLab comparison found nine descendant commits and source parity with published 0.1.0.1; branch fast-forwarded to GitLab history.
 Current: final review and branch CI. Cabal/Nix, documentation and Spec Kit setup are implemented; eight tests and the example pass, including from the rebuilt source archive. Two compiled mutations confirm dependency traversal and failed-prerequisite coverage.
-External setup: wiki first page needs a signed-in maintainer. No self-hosted runner is currently available; CI selects a GitHub-hosted runner before transfer and nixos afterward. Transfer and package publication remain outside execution scope.
+External setup: wiki first page needs a signed-in maintainer. The organization Default runner group includes this public repository and has ten online nixos runners; CI selects nixos after transfer. The operator subsequently authorized the transfer; it completed with repository ID 110524936 preserved. Package publication remains outside execution scope.
 
 ## Contributor story
 
