@@ -1,0 +1,36 @@
+site_name: tasty-bdd
+site_description: Typed Given/When/Then scenarios for Haskell and Tasty
+site_url: https://paolino.github.io/tasty-bdd/
+repo_url: https://github.com/paolino/tasty-bdd
+edit_uri: edit/master/docs/
+nav:
+  - Home: index.md
+  - Write a scenario: stories/scenarios.md
+  - Architecture: architecture/execution.md
+  - Development: development.md
+  - Release preparation: releases.md
+theme:
+  name: material
+  palette:
+    - media: '(prefers-color-scheme: light)'
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: '(prefers-color-scheme: dark)'
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+plugins:
+  - search
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+extra_javascript:
+  - assets/javascripts/mermaid.min.js

@@ -1,2 +1,14 @@
-.stack-work
-tasty-bdd-0.1.0.0.tar.gz
+/dist-newstyle/
+/dist/
+/result*
+/.direnv/
+/.llm/
+/site/
+/cabal.project.local
+/cabal.project.freeze
+/cabal.project.devshell
+/.ghc.environment.*
+*.hi
+*.o
+*.dyn_hi
+*.dyn_o

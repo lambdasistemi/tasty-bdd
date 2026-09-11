@@ -1,0 +1,23 @@
+name: Prepare release
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build-gate:
+    name: Release Build Gate
+    runs-on: ${{ github.repository_owner == 'lambdasistemi' && 'nixos' || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install Nix before organization transfer
+        if: github.repository_owner != 'lambdasistemi'
+        uses: paolino/dev-assets/setup-nix@0328b73b71788bb83848fe407dd04136a52c3697
+        with:
+          cachix-auth-token: ${{ secrets.CACHIX_AUTH_TOKEN }}
+      - run: nix flake check --accept-flake-config --no-eval-cache
+      - run: nix build --accept-flake-config .#source-dist -o result-sdist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: source-distribution-for-review
+          path: result-sdist/*.tar.gz
+          if-no-files-found: error

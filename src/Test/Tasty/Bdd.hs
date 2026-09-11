@@ -6,47 +6,48 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
--- |
--- Module    :  Test.Tasty.Bdd
--- Copyright :  (c) Paolo Veronelli, Pavlo Kerestey 2017-2020
--- License   :  All rights reserved
--- Maintainer:  paolo.veronelli@gmail.com
--- Stability :  experimental
--- Portability: non-portable
---
--- Tasty driver for 'Language'
+{- |
+Module    :  Test.Tasty.Bdd
+Copyright :  (c) Paolo Veronelli, Pavlo Kerestey 2017-2020
+License   :  BSD-3-Clause
+Maintainer:  paolo.veronelli@gmail.com
+Stability :  experimental
+Portability: non-portable
+
+Tasty driver for 'Language'
+-}
 module Test.Tasty.Bdd
-  ( (@?=)
-  , (@?/=)
-  , (^?=)
-  , (^?/=)
-  , acquire
-  , acquirePure
-  , Phase (..)
-  , Language (..)
-  , testBehavior
-  , testBehaviorIO
-  , BDDTesting
-  , BDDPreparing
-  , TestableMonad (..)
-  , failFastIngredients
-  , failFastTester
-  , prettyDifferences
-  , beforeEach
-  , afterEach
-  , before
-  , after
-  , onEach
-  , captureStdout
-  , testBehaviorF
-  )
+    ( (@?=)
+    , (@?/=)
+    , (^?=)
+    , (^?/=)
+    , acquire
+    , acquirePure
+    , Phase (..)
+    , Language (..)
+    , testBehavior
+    , testBehaviorIO
+    , BDDTesting
+    , BDDPreparing
+    , TestableMonad (..)
+    , failFastIngredients
+    , failFastTester
+    , prettyDifferences
+    , beforeEach
+    , afterEach
+    , before
+    , after
+    , onEach
+    , captureStdout
+    , testBehaviorF
+    )
 where
 
 import Control.Monad.Catch
-  ( Exception (..)
-  , MonadCatch (..)
-  , MonadThrow (..)
-  )
+    ( Exception (..)
+    , MonadCatch (..)
+    , MonadThrow (..)
+    )
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Data.Tagged (Tagged (..))
 import Data.TreeDiff
@@ -56,84 +57,86 @@ import System.IO.Unsafe (unsafePerformIO)
 import Test.BDD.Language
 import Test.BDD.LanguageFree
 import Test.Tasty
-  ( withResource
-  )
+    ( withResource
+    )
 import Test.Tasty.Ingredients.FailFast (FailFast (..), failFast)
 import Test.Tasty.Options (OptionDescription (..), lookupOption)
 import Test.Tasty.Providers
-  ( IsTest (..)
-  , singleTest
-  , testFailed
-  , testPassed
-  )
+    ( IsTest (..)
+    , singleTest
+    , testFailed
+    , testPassed
+    )
 import Test.Tasty.Runners
 import Text.Printf (printf)
 
 data FreeBDDCase m = FreeBDDCase (m Result -> IO Result) (m (BDDResult m))
 
+-- | Adapt a free-monad scenario to Tasty using a runner for its monad.
 testBehaviorF
-  :: (Typeable m, MonadCatch m)
-  => (m Result -> IO Result)
-  -> String
-  -> FreeBDD m x
-  -> TestTree
+    :: (Typeable m, MonadCatch m)
+    => (m Result -> IO Result)
+    -> String
+    -> FreeBDD m x
+    -> TestTree
 testBehaviorF f s = singleTest s . FreeBDDCase f . testFreeBDD
 
 instance (MonadCatch m, Typeable m) => IsTest (FreeBDDCase m) where
-  run _ (FreeBDDCase rc test) _ = rc $ test >>= g
-    where
-      g (Failed e td) = do
-        td
-        maybe
-          (throwM e)
-          (return . testFailed . testFailMessage)
-          $ fromException e
-      g (Succeded td) = td >> return (testPassed "")
-  testOptions = Tagged [Option (Proxy :: Proxy FailFast)]
+    run _ (FreeBDDCase rc test) _ = rc $ test >>= g
+      where
+        g (Failed e td) = do
+            td
+            maybe
+                (throwM e)
+                (return . testFailed . testFailMessage)
+                $ fromException e
+        g (Succeded td) = td >> return (testPassed "")
+    testOptions = Tagged [Option (Proxy :: Proxy FailFast)]
 
 -- | testable monads can map to IO a Tasty Result
 class (MonadCatch m, MonadIO m, Monad m, Typeable m) => TestableMonad m where
-  runCase :: m Result -> IO Result
+    runCase :: m Result -> IO Result
 
 instance TestableMonad IO where
-  runCase = id
+    runCase = id
 
 -- | any testable monad can make a BDDTest a tasty test
 instance
-  (Typeable t, TestableMonad m)
-  => IsTest (BDDTest m t ())
-  where
-  run os (BDDTest ts rup w) f = runCase $ do
-    teardowns <-
-      sequence_ . reverse <$> mapM (\(TestContext g a) -> a <$> g) rup
-    resultOfWhen <- w
-    let loop [] = return Nothing
-        loop (then' : xs) = do
-          liftIO $
-            f
-              (Progress
-                 ""
-                 (fromIntegral (length xs) / fromIntegral (length ts)))
-          (then' resultOfWhen >> loop xs)
-            `catch` (\(EqualityDoesntHold e) -> return (Just e))
-    resultOfThen <- loop ts
-    case resultOfThen of
-      Just reason -> do
-        case lookupOption os of
-          FailFast False -> teardowns
-          _ -> return ()
-        return $ testFailed reason
-      Nothing -> teardowns >> return (testPassed "")
-  testOptions = Tagged [Option (Proxy :: Proxy FailFast)]
+    (Typeable t, TestableMonad m)
+    => IsTest (BDDTest m t ())
+    where
+    run os (BDDTest ts rup w) f = runCase $ do
+        teardowns <-
+            sequence_ . reverse <$> mapM (\(TestContext g a) -> a <$> g) rup
+        resultOfWhen <- w
+        let loop [] = return Nothing
+            loop (then' : xs) = do
+                liftIO $
+                    f
+                        ( Progress
+                            ""
+                            (fromIntegral (length xs) / fromIntegral (length ts))
+                        )
+                (then' resultOfWhen >> loop xs)
+                    `catch` (\(EqualityDoesntHold e) -> return (Just e))
+        resultOfThen <- loop ts
+        case resultOfThen of
+            Just reason -> do
+                case lookupOption os of
+                    FailFast False -> teardowns
+                    _ -> return ()
+                return $ testFailed reason
+            Nothing -> teardowns >> return (testPassed "")
+    testOptions = Tagged [Option (Proxy :: Proxy FailFast)]
 
 -- | show a coloured difference of 2 values
 prettyDifferences :: (ToExpr a) => a -> a -> String
 prettyDifferences a1 a2 =
-  show $ ansiWlEditExpr $ exprDiff (toExpr a1) (toExpr a2)
+    show $ ansiWlEditExpr $ exprDiff (toExpr a1) (toExpr a2)
 
 -- internal exception to trigger visual inspection on output
 newtype EqualityDoesntHold = EqualityDoesntHold {testFailMessage :: String}
-  deriving (Show, Typeable)
+    deriving (Show)
 
 instance Exception EqualityDoesntHold
 
@@ -142,41 +145,48 @@ infixl 4 @?=
 -- | equality test which show pretty differences on fail
 (@?=) :: (ToExpr a, Eq a, Typeable a, MonadThrow m) => a -> a -> m ()
 a1 @?= a2 =
-  if a1 == a2
-    then return ()
-    else
-      throwM $
-        EqualityDoesntHold $
-          printf "Expected equality:\n%s" $
-            prettyDifferences a1 a2
+    if a1 == a2
+        then return ()
+        else
+            throwM $
+                EqualityDoesntHold $
+                    printf "Expected equality:\n%s" $
+                        prettyDifferences a1 a2
 
 -- | inequality test which show pretty differences on fail
 (@?/=) :: (ToExpr a, Eq a, Typeable a, MonadThrow m) => a -> a -> m ()
 a1 @?/= a2 =
-  if a1 /= a2
-    then return ()
-    else
-      throwM $
-        EqualityDoesntHold $
-          printf "Expected inequality:\n%s" $
-            prettyDifferences a1 a2
+    if a1 /= a2
+        then return ()
+        else
+            throwM $
+                EqualityDoesntHold $
+                    printf "Expected inequality:\n%s" $
+                        prettyDifferences a1 a2
 
--- | shortcut to ignore the input and run another action instead in Then
--- matching equality
-(^?=) :: (ToExpr a, Eq a, Typeable a, MonadThrow m) => m a -> a -> b -> m ()
+{- | shortcut to ignore the input and run another action instead in Then
+matching equality
+-}
+(^?=)
+    :: (ToExpr a, Eq a, Typeable a, MonadThrow m) => m a -> a -> b -> m ()
 f ^?= t = const $ f >>= (@?= t)
 
--- | shortcut to ignore the input and run another action instead in Then
--- matching inequality
-(^?/=) :: (ToExpr a, Eq a, Typeable a, MonadThrow m) => m a -> a -> b -> m ()
+{- | shortcut to ignore the input and run another action instead in Then
+matching inequality
+-}
+(^?/=)
+    :: (ToExpr a, Eq a, Typeable a, MonadThrow m) => m a -> a -> b -> m ()
 f ^?/= t = const $ f >>= (@?/= t)
 
 -- | interpret 'Bdd' sentence to a single 'TestTree'
 testBehavior
-  :: (MonadIO m, TestableMonad m, Typeable t)
-  => String -- ^ test name
-  -> BDDPreparing m t () -- ^ bdd test definition
-  -> TestTree -- ^ resulting tasty test
+    :: (MonadIO m, TestableMonad m, Typeable t)
+    => String
+    -- ^ test name
+    -> BDDPreparing m t ()
+    -- ^ bdd test definition
+    -> TestTree
+    -- ^ resulting tasty test
 testBehavior s = singleTest s . interpret
 
 -- | specialize withResource to prepend an action
@@ -205,17 +215,22 @@ afterEach :: IO () -> TestTree -> TestTree
 afterEach = onEach . after
 
 -- | specialize withResource to just acquire a resource
-acquire :: MonadIO m => IO a -> (m a -> TestTree) -> TestTree
+acquire :: (MonadIO m) => IO a -> (m a -> TestTree) -> TestTree
 acquire f g = withResource f (const $ return ()) (g . liftIO)
 
+-- | Acquire a resource and expose its value through the resource callback.
 acquirePure :: IO a -> (a -> TestTree) -> TestTree
 acquirePure f g = acquire f $ g . unsafePerformIO
 
+-- | Acquire a constructor-based scenario in IO and adapt it to Tasty.
 testBehaviorIO
-  :: (Typeable t, MonadIO m, TestableMonad m)
-  => String -- ^ test name
-  -> IO (BDDPreparing m t ()) -- ^ bdd test definition
-  -> TestTree -- ^ resulting tasty test
+    :: (Typeable t, MonadIO m, TestableMonad m)
+    => String
+    -- ^ test name
+    -> IO (BDDPreparing m t ())
+    -- ^ bdd test definition
+    -> TestTree
+    -- ^ resulting tasty test
 testBehaviorIO s f = acquirePure f (testBehavior s)
 
 -- | default test runner fail-fast aware

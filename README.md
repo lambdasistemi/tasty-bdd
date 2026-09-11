@@ -1,54 +1,44 @@
-[![CircleCI](https://circleci.com/gh/ptek/tasty-bdd/tree/master.svg?style=svg)](https://circleci.com/gh/ptek/tasty-bdd/tree/master)
+# tasty-bdd
 
-# Behavior-driven development 
+Typed Given/When/Then scenarios for Haskell's Tasty test framework.
 
-## A [Haskell](https://www.haskell.org/) Behavior Driven Development framework featuring:
+## User stories: write readable test scenarios
 
-* A type constrained language to express
-  *  *Given* as ordered preconditions or
-  *  *GivenAndAfter* as oredered preconditions with reversed order of teardown actions (sort of resource management)
-  *  One only *When* to introduce a last precondition and catch it's output to be fed to
-  *  Some *Then* tests that will receive the output of *When*
-* Support for do notation via free monad for composing _givens_ and _thens_ 
-* One monad independent pure interpreter
-* One driver for the great [tasty](https://github.com/feuerbach/tasty) test library,  monad parametrized
-* Support for [tasty-fail-fast](https://hackage.haskell.org/package/tasty-fail-fast) strategy flag which will not execute the teardown actions of the failed test
-* A sophisticated form of value introspection to show the differences on equality failure from [tree-diff](https://github.com/phadej/tree-diffdifftree) package 
-* Recursive test decorators to prepend or append action to all the tests inside a test tree
+As a test author, you can express setup, an action and assertions using constructors or `do` notation. Successful assertions pass the Tasty test; failed equality assertions show structural differences.
 
-## Background
-
-[Behavior Driven Development](https://en.wikipedia.org/wiki/Behavior-driven_development) is a software development process that emerged from test-driven development (TDD) and is based on principles of [Hoare Logic](https://en.wikipedia.org/wiki/Hoare_logic). The process requires a strict structure of the tests - {Given} When {Then} - to make them understandable.
-
-## Example with raw DSL
-
-```haskell
-import Test.Tasty.Bdd
-
-tests :: TestTree
-tests = testBdd "Test sequence" 
-    $ Given (print "Some effect")
-    $ Given (print "Another effect")
-    $ GivenAndAfter (print "Aquiring resource" >> return "Resource 1")
-                    (print . ("Release "++))
-    $ GivenAndAfter (print "Aquiring resource" >> return "Resource 2")
-                    (print . ("Release "++))
-    $ When (print "Action returning" >> return ([1..10]++[100..106]) :: IO [Int])
-    $ Then (@?= ([1..10]++[700..706]))
-    $ End
+```mermaid
+flowchart LR
+  Given -->|prepare input| When
+  When -->|pass result| Then
+  Then -->|report outcome| Tasty
 ```
 
-## Extract with free monad 
-
 ```haskell
-test_produce_values :: IO [TestTree]
-test_produce_values = do
-  map (beforeEach cleanElectricityAccounting) <$> testBehaviors do
-    bdd "read samples" $ do
-      sf <- given openTestSalesforce
-      givenSamples $ do
-        sample uuid1 "2019" 0
-      when_
-        do runAccounting sf $ accountingProduceValues "2019" t2020
-        do then_ $ \result -> length result @?= 1
+import Test.BDD.LanguageFree (given, then_, when_)
+import Test.Tasty (defaultMain)
+import Test.Tasty.Bdd ((@?=), testBehaviorF)
+
+main :: IO ()
+main = defaultMain $ testBehaviorF id "addition" $ do
+    initial <- given $ pure (40 :: Int)
+    when_ (pure $ initial + 2) $ then_ (@?= 42)
 ```
+
+This example is compiled and run by the `example` test suite. See [scenario examples](docs/stories/scenarios.md) and the [execution model](docs/architecture/execution.md) for setup, teardown and fail-fast behavior.
+
+## Build and contribute
+
+```sh
+nix develop --accept-flake-config
+just build
+just unit
+just ci
+```
+
+The locked flake uses GHC 9.12.3 on x86_64 Linux. `nix flake check --accept-flake-config` runs the packaged build, tests, lint, formatting and documentation checks. Other systems have not been verified. See [development](docs/development.md) and the [Spec Kit plan](specs/001-modernization/plan.md).
+
+## Published package
+
+[Hackage](https://hackage.haskell.org/package/tasty-bdd) carries 0.1.0.0 and 0.1.0.1. GitLab history through January 2025 is retained here, including the source published in 0.1.0.1. This modernization has not published a new package. See [release preparation](docs/releases.md).
+
+Licensed under [BSD-3-Clause](LICENSE).
