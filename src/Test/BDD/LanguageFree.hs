@@ -1,156 +1,160 @@
 -------------------------------------------------------------------------------
--- | Free monads to introduce do notation in ''Language''
---
--- Module    :
--- Copyright :  (c) Paolo Veronelli 2017
--- License   :  All rights reserved
--- Maintainer:  paolo.veronelli@gmail.com
--- Stability :  experimental
--- Portability: non-portable
---
---
---
 -------------------------------------------------------------------------------
-
-{-# LANGUAGE DataKinds                 #-}
-{-# LANGUAGE DeriveFunctor             #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE ExistentialQuantification #-}
-{-# LANGUAGE FlexibleContexts          #-}
-{-# LANGUAGE FlexibleInstances         #-}
-{-# LANGUAGE GADTs                     #-}
-{-# LANGUAGE MultiParamTypeClasses     #-}
-{-# LANGUAGE Rank2Types                #-}
-{-# LANGUAGE ScopedTypeVariables       #-}
-{-# LANGUAGE TupleSections             #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE Rank2Types #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TupleSections #-}
 
+{- | Free monads for composing Given/When/Then scenarios.
+
+Module    : Test.BDD.LanguageFree
+Copyright :  (c) Paolo Veronelli 2017
+License   :  BSD-3-Clause
+Maintainer:  paolo.veronelli@gmail.com
+Stability :  experimental
+Portability: non-portable
+-}
 module Test.BDD.LanguageFree
-    (
-        given
-        , givenAndAfter_
-        , givenAndAfter
-        , then_
-        , then__
-        , when_
-        , GivenFree
-        , ThenFree
-        , FreeBDD
-        , testFreeBDD
-        , BDDResult (..)
---        , testBehaviorFree
---
---
+    ( given
+    , givenAndAfter_
+    , givenAndAfter
+    , then_
+    , then__
+    , when_
+    , GivenFree
+    , ThenFree
+    , FreeBDD
+    , testFreeBDD
+    , BDDResult (..)
     )
-    where
+where
 
-import Control.Monad.Free
--- import Control.Exception
 import Control.Monad.Catch
-import Control.Monad.Cont
+import Control.Monad.Free
 import Control.Monad.Reader
-
 
 -- | Separating the 2 phases by type
 data Phase t = Preparing | Testing t
-
-
 
 -- | Bare hoare language
 data Language m a where
     -- | action to prepare the test
     Given :: m a -> (a -> Language m 'Preparing) -> Language m 'Preparing
     -- | action to prepare the test, and related teardown action
-    GivenAndAfter :: m (a, r) -> (r -> m ()) -> (a -> Language m 'Preparing) -> Language m 'Preparing
+    GivenAndAfter
+        :: m (a, r)
+        -> (r -> m ())
+        -> (a -> Language m 'Preparing)
+        -> Language m 'Preparing
     -- | core logic of the test (last preparing action)
     When :: m t -> Language m ('Testing t) -> Language m 'Preparing
     -- | action producing a test
-    Then :: (t -> m ()) -> Language m ('Testing t) -> Language m ('Testing t)
+    Then
+        :: (t -> m ()) -> Language m ('Testing t) -> Language m ('Testing t)
     -- | final placeholder
     End :: Language m x
-    And :: Language m 'Preparing -> Language m 'Preparing -> Language m 'Preparing
+    And
+        :: Language m 'Preparing
+        -> Language m 'Preparing
+        -> Language m 'Preparing
 
-
-
+-- | A scenario result carrying the recorded teardown action.
 data BDDResult m = Failed SomeException (m ()) | Succeded (m ())
-
-
 
 type CJR m = ReaderT (m ()) m (BDDResult m)
 
-catchCJR :: MonadCatch m => CJR m  -> CJR m
+catchCJR :: (MonadCatch m) => CJR m -> CJR m
 catchCJR f = catch f $ asks . Failed
 
-stepIn :: MonadCatch m => m a -> (a -> CJR m ) -> CJR m
-stepIn g q = catchCJR (lift g >>= q) 
+stepIn :: (MonadCatch m) => m a -> (a -> CJR m) -> CJR m
+stepIn g q = catchCJR (lift g >>= q)
 
-interpret :: forall m . MonadCatch m => Language m  'Preparing -> m (BDDResult m)
-interpret  y = runReaderT (interpret' y) (return  ()) where
+interpret
+    :: forall m. (MonadCatch m) => Language m 'Preparing -> m (BDDResult m)
+interpret y = runReaderT (interpret' y) (return ())
+  where
     interpret' :: Language m 'Preparing -> CJR m
     interpret' (Given g p) = stepIn g $ interpret' . p
     interpret' (GivenAndAfter g z p) =
-                     stepIn g $ \(x,r) -> local (z r >>) $ interpret' $ p x
+        stepIn g $ \(x, r) -> local (z r >>) $ interpret' $ p x
     interpret' (When fa p) =
-                     stepIn fa $ \x -> interpretT'  x p
+        stepIn fa $ \x -> interpretT' x p
     interpret' (And f g) = do
         r <- interpret' f
         case r of
-             Succeded _ ->  interpret' g
-             w  -> pure w 
-    interpret'  End = asks Succeded
+            Succeded _ -> interpret' g
+            w -> pure w
+    interpret' End = asks Succeded
     interpretT' :: t -> Language m ('Testing t) -> CJR m
     interpretT' _ End = asks Succeded
     interpretT' x (Then f p) =
-                     stepIn (f x) $ \() -> interpretT'  x p
+        stepIn (f x) $ \() -> interpretT' x p
 
+-- | Preparation instructions for the free-monad interface.
+data GivenFree m a where
+    GivenFree :: m b -> (b -> a) -> GivenFree m a
+    GivenAndAfterFree
+        :: m (b, r) -> (r -> m ()) -> (b -> a) -> GivenFree m a
+    WhenFree :: m t -> Free (ThenFree m t) c -> a -> GivenFree m a
 
-data GivenFree m  a where
-    GivenFree :: m b -> (b -> a) -> GivenFree m  a
-    GivenAndAfterFree :: m (b,r) -> (r -> m ()) -> (b -> a) -> GivenFree m a
-    WhenFree :: m t -> Free (ThenFree m t) c -> a -> GivenFree m  a
-
+-- | Assertions that consume the result of a scenario action.
 data ThenFree m t a
     = ThenFree (t -> m ()) a
-    deriving Functor
+    deriving (Functor)
 
 instance Functor (GivenFree m) where
-    fmap f (GivenFree m x)             = GivenFree m $ f <$> x
+    fmap f (GivenFree m x) = GivenFree m $ f <$> x
     fmap f (GivenAndAfterFree mr rm x) = GivenAndAfterFree mr rm $ f <$> x
-    fmap f (WhenFree mt ft x)          = WhenFree mt ft $ f x
+    fmap f (WhenFree mt ft x) = WhenFree mt ft $ f x
 
-
+-- | A scenario built from preparation instructions.
 type FreeBDD m x = Free (GivenFree m) x
 
+-- | Run a preparation action and return its value to subsequent steps.
 given :: m a -> Free (GivenFree m) a
 given m = liftF $ GivenFree m id
 
-givenAndAfter :: m (b,r) -> (r -> m ()) -> Free (GivenFree m) b
+-- | Acquire a value and resource, recording the resource teardown.
+givenAndAfter :: m (b, r) -> (r -> m ()) -> Free (GivenFree m) b
 givenAndAfter g td = liftF $ GivenAndAfterFree g td id
 
-givenAndAfter_ :: Functor m =>  m r -> (r -> m ()) -> Free (GivenFree m) ()
-givenAndAfter_ g td = liftF $ GivenAndAfterFree (((),) <$>  g) td id
+-- | Acquire a resource and record its teardown without returning a value.
+givenAndAfter_
+    :: (Functor m) => m r -> (r -> m ()) -> Free (GivenFree m) ()
+givenAndAfter_ g td = liftF $ GivenAndAfterFree (((),) <$> g) td id
 
+-- | Run the scenario action and feed its result to the assertions.
 when_ :: m t -> Free (ThenFree m t) b -> Free (GivenFree m) ()
 when_ mt ts = liftF $ WhenFree mt ts ()
 
 thens :: Free (ThenFree m t) a -> Language m ('Testing t)
 thens (Free (ThenFree m f)) = Then m $ thens f
-thens (Pure _)              = End
+thens (Pure _) = End
 
-bddFree :: Free (GivenFree m) x -> Language m  'Preparing
+bddFree :: Free (GivenFree m) x -> Language m 'Preparing
 bddFree (Free (GivenFree m f)) = Given m $ bddFree <$> f
 bddFree (Free (GivenAndAfterFree mr rm f)) =
     GivenAndAfter mr rm $ bddFree <$> f
 bddFree (Free (WhenFree mt ts f)) = And (When mt $ thens ts) (bddFree f)
-bddFree (Pure _                 ) = End 
+bddFree (Pure _) = End
 
-
+-- | Add an assertion using the scenario action result.
 then_ :: (t -> m ()) -> Free (ThenFree m t) ()
 then_ m = liftF $ ThenFree m ()
 
+-- | Add an assertion independent of the scenario action result.
 then__ :: m () -> Free (ThenFree m t) ()
-then__  = then_ . const
+then__ = then_ . const
 
-testFreeBDD :: (MonadCatch m)
-          => Free (GivenFree m) x
-          -> m (BDDResult m)
+-- | Execute a scenario and return its result with recorded teardown.
+testFreeBDD
+    :: (MonadCatch m)
+    => Free (GivenFree m) x
+    -> m (BDDResult m)
 testFreeBDD = interpret . bddFree
-

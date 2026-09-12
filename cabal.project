@@ -1,0 +1,5 @@
+packages: .
+-- The published API baseline generates lenses with Template Haskell.
+extra-packages: microlens-th ==0.4.3.17
+index-state: 2026-02-17T10:15:41Z
+tests: True
