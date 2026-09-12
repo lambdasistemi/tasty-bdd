@@ -18,3 +18,5 @@ Repository ownership does not change Hackage ownership or existing package descr
 The release workflow prepares an archive for review and never uploads to Hackage. No automatic tagging or package publication is enabled by this modernization.
 
 External dependency links in the optional Haddock bundle depend on installed dependency interfaces; missing external interfaces do not waive the package’s own documentation coverage.
+
+Every library, whether published or unpublished, has its current generated API embedded in the documentation. For tasty-bdd, the [API reference](api.md) embeds the same Haddock bundle checked for release. CI verifies every embedded file and local API link; deployment compares the served API and source pages with that build.

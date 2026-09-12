@@ -6,6 +6,7 @@ edit_uri: edit/master/docs/
 nav:
   - Home: index.md
   - Write a scenario: stories/scenarios.md
+  - API reference: api.md
   - Architecture: architecture/execution.md
   - Development: development.md
   - Release preparation: releases.md

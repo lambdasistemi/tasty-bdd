@@ -1,6 +1,6 @@
 # tasty-bdd constitution
 
-Version: 1.0.0. Ratified: 2026-09-11.
+Version: 1.1.0. Ratified: 2026-09-11. Amended: 2026-09-12.
 
 ## Core principles
 
@@ -9,6 +9,7 @@ Version: 1.0.0. Ratified: 2026-09-11.
 3. Use a locked Nix flake and GHC 9.12.3. Local and CI checks execute the same tools. Build, tests, formatting, lint, package metadata and documentation checks must fail when their subject is broken.
 4. Keep the Cabal package description authoritative; do not maintain generated hpack and handwritten Cabal descriptions concurrently. Keep package metadata suitable for Hackage.
 5. Keep source provenance: preserve the GitLab commits that follow GitHub and match the published library source. Repository ownership and package publication are separate operations.
+6. Every library package and component, published or unpublished, must embed its current generated API reference in the live project documentation using its language’s appropriate tool. For this Haskell project, use Haddock. CI derives and verifies the embedded API from the same source revision and checks the served pages; independently maintained API copies are not acceptable. A Hackage release reuses that rendering.
 
 ## Development workflow
 

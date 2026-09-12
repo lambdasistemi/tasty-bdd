@@ -127,7 +127,9 @@ let
     cd work
     mkdir -p docs/assets/javascripts
     cp ${mermaid} docs/assets/javascripts/mermaid.min.js
+    python3 tools/embed-haddock.py ${hackageRelease}/*-docs.tar.gz docs/haddock
     mkdocs build --strict --site-dir $out
+    python3 tools/embed-haddock.py ${hackageRelease}/*-docs.tar.gz $out/haddock --check
   '';
 in builtins.mapAttrs mkCheck apps // {
   inherit docs hackageRelease;
