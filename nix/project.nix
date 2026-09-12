@@ -8,6 +8,7 @@ pkgs.haskell-nix.cabalProject' {
     packages.tasty-bdd.ghcOptions = [ "-O2" ];
   }];
   shell = {
+    additional = ps: [ ps.microlens-th ];
     withHoogle = false;
     buildInputs = with lintPkgs; [
       cabal-install

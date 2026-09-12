@@ -35,7 +35,7 @@ just unit
 just ci
 ```
 
-The locked flake uses GHC 9.12.3 on x86_64 Linux. `nix flake check --accept-flake-config` runs the packaged build, tests, lint, formatting and documentation checks. Other systems have not been verified. See [development](docs/development.md) and the [Spec Kit plan](specs/001-modernization/plan.md).
+The locked flake uses GHC 9.12.3 on x86_64 Linux. `nix flake check --accept-flake-config` runs the packaged build, tests, lint, formatting and documentation checks. Other systems have not been verified. Read the [published documentation](https://lambdasistemi.github.io/tasty-bdd/). See [development](docs/development.md) and the [Spec Kit plan](specs/001-modernization/plan.md).
 
 ## Published package
 

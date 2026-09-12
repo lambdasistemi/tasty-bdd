@@ -28,5 +28,14 @@ build-docs:
 sdist:
     cabal sdist --output-directory=dist
 
+api-compat:
+    nix run .#api-compat
+
+hackage-quality:
+    nix run .#hackage-quality
+
+release-check:
+    nix build .#hackage-release -o result-release
+
 ci: build unit
     nix flake check --no-eval-cache

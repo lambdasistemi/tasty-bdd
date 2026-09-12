@@ -7,7 +7,6 @@
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE Rank2Types #-}
-{-# LANGUAGE TemplateHaskell #-}
 
 {- |
 
@@ -41,11 +40,8 @@ module Test.BDD.Language
     , BDDTesting
     , BDDTest (..)
     , TestContext (..)
-      -- | Lens for the ordered preparation actions and their teardowns.
     , context
-      -- | Lens for the action whose result is supplied to the assertions.
     , when
-      -- | Lens for the assertions applied to the scenario result.
     , tests
     , interpret
     , Phase (..)
@@ -53,7 +49,6 @@ module Test.BDD.Language
 where
 
 import Lens.Micro
-import Lens.Micro.TH
 
 -- | Separating the 2 phases by type
 data Phase = Preparing | Testing
@@ -97,7 +92,29 @@ data BDDTest m t q = BDDTest
     -- ^ when action to compute @t@
     }
 
-makeLenses ''BDDTest
+-- | Lens for the ordered preparation actions and their teardowns.
+context
+    :: (Functor f)
+    => ([TestContext m] -> f [TestContext m])
+    -> BDDTest m t q
+    -> f (BDDTest m t q)
+context f (BDDTest ts c w) = (\c' -> BDDTest ts c' w) <$> f c
+
+-- | Lens for the assertions, allowing their result type to change.
+tests
+    :: (Functor f)
+    => ([t -> m q1] -> f [t -> m q2])
+    -> BDDTest m t q1
+    -> f (BDDTest m t q2)
+tests f (BDDTest ts c w) = (\ts' -> BDDTest ts' c w) <$> f ts
+
+-- | Lens for the action whose result is supplied to the assertions.
+when
+    :: (Functor f)
+    => (m t -> f (m t))
+    -> BDDTest m t q
+    -> f (BDDTest m t q)
+when f (BDDTest ts c w) = BDDTest ts c <$> f w
 
 -- | Preparing language types
 type BDDPreparing m t q = Language m t q 'Preparing

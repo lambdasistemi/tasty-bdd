@@ -12,6 +12,7 @@ import qualified Test.Tasty as Tasty
 import Test.Tasty.Bdd
 import Test.Tasty.ExpectedFailure
 import Test.Tasty.HUnit hiding ((@?=))
+import Test.Tasty.Runners (NumThreads (..))
 
 main :: IO ()
 main =
@@ -165,6 +166,26 @@ main =
                                     , Tasty.after AllSucceed "prerequisite" $ testCase "dependent" $ write 2
                                     ]
                 testTest t ([0, 1] :: [Int])
+            , testCase
+                "onEach traverses resources, options, groups and dependencies"
+                $ do
+                    let t write =
+                            defaultMain
+                                $ localOption (NumThreads 1)
+                                $ onEach (before $ write 0)
+                                $ withResource
+                                    (write 10)
+                                    (const $ write 11)
+                                $ \resource ->
+                                    askOption $ \(NumThreads _) ->
+                                        localOption (NumThreads 1) $
+                                            testGroup
+                                                "wrapped"
+                                                [ testCase "first" $ resource >> write 1
+                                                , Tasty.after AllSucceed "first" $
+                                                    testGroup "nested" [testCase "second" $ write 2]
+                                                ]
+                    testTest t ([10, 0, 1, 0, 2, 11] :: [Int])
             , expectFail $ testBehaviorF runCase "didn't break tasty" $ do
                 when_ (pure 42 :: IO Int) $ then_ $ \x -> x @?= 43
             ]

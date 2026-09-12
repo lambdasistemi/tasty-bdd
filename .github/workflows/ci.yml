@@ -35,7 +35,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        check: [unit, format-check, hlint, cabal-check, workflow-check, docs, sdist-rebuild]
+        check: [unit, format-check, hlint, cabal-check, workflow-check, docs, sdist-rebuild, api-compat, hackage-quality]
     steps:
       - uses: actions/checkout@v6
       - name: Install Nix before organization transfer

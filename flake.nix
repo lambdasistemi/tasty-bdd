@@ -40,6 +40,8 @@
       };
       checks = import ./nix/checks.nix {
         inherit pkgs lintPkgs components;
+        inherit sourceDist;
+        buildShell = project.shell;
         archiveComponents = archiveProject.hsPkgs.tasty-bdd.components;
         src = ./.;
         docsShell = mkdocs.devShells.${system}.default;
@@ -51,9 +53,11 @@
         example = components.tests.example;
         docs = checks.docs;
         source-dist = sourceDist;
+        hackage-release = checks.hackageRelease;
       };
       devShells.${system}.default = project.shell;
-      checks.${system} = builtins.removeAttrs checks [ "apps" ];
+      checks.${system} =
+        builtins.removeAttrs checks [ "apps" "hackageRelease" ];
       apps.${system} = builtins.mapAttrs (_: app: {
         type = "app";
         meta.description = "Run the tasty-bdd ${app.name} check";
