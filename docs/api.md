@@ -2,7 +2,7 @@
 
 ## Find the types and functions for your scenario
 
-As a test author, you can browse the exact API rendering built for the current Hackage release candidate. Choose a module below, or use the symbol index inside the reference.
+As a test author, you can browse the exact API rendering that the Hackage release check builds from this source. Choose a module below, or use the symbol index inside the reference.
 
 - <a href="../haddock/Test-Tasty-Bdd.html" target="bdd-api">Tasty integration and decorators</a>
 - <a href="../haddock/Test-BDD-Language.html" target="bdd-api">Typed constructor DSL and lenses</a>
@@ -21,7 +21,7 @@ The documentation build extracts the checked Hackage Haddock bundle. CI rejects 
 flowchart LR
   Source -->|package and test| Archive
   Archive -->|render and verify coverage| Haddock
-  Haddock -->|bundle| HackageCandidate
+  Haddock -->|bundle for upload| HackageDocs
   Haddock -->|embed same rendering| Documentation
   Documentation -->|verify served bytes| Pages
 ```
