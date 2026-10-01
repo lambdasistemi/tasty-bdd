@@ -5,6 +5,7 @@ module Main (main) where
 
 import Control.Concurrent.MVar
 import Control.Exception
+import TeardownSafety (teardownSafetyTests)
 import Test.BDD.LanguageFree
 import qualified Test.HUnit as H
 import Test.Tasty hiding (after)
@@ -188,6 +189,7 @@ main =
                     testTest t ([10, 0, 1, 0, 2, 11] :: [Int])
             , expectFail $ testBehaviorF runCase "didn't break tasty" $ do
                 when_ (pure 42 :: IO Int) $ then_ $ \x -> x @?= 43
+            , teardownSafetyTests
             ]
 
 testTest :: (Show a, Eq a) => ((a -> IO ()) -> IO ()) -> [a] -> IO ()
