@@ -43,12 +43,15 @@ module Test.Tasty.Bdd
     )
 where
 
+import Control.Monad (foldM)
 import Control.Monad.Catch
     ( Exception (..)
     , MonadCatch (..)
     , MonadThrow (..)
+    , catchAll
     )
 import Control.Monad.IO.Class (MonadIO, liftIO)
+import Data.Maybe (fromMaybe, isNothing)
 import Data.Tagged (Tagged (..))
 import Data.TreeDiff
 import Data.Typeable (Proxy (..), Typeable)
@@ -85,7 +88,7 @@ instance (MonadCatch m, Typeable m) => IsTest (FreeBDDCase m) where
     run _ (FreeBDDCase rc test) _ = rc $ test >>= g
       where
         g (Failed e td) = do
-            td
+            td `catchAll` const (return ())
             maybe
                 (throwM e)
                 (return . testFailed . testFailMessage)
@@ -106,28 +109,60 @@ instance
     => IsTest (BDDTest m t ())
     where
     run os (BDDTest ts rup w) f = runCase $ do
-        teardowns <-
-            sequence_ . reverse <$> mapM (\(TestContext g a) -> a <$> g) rup
-        resultOfWhen <- w
-        let loop [] = return Nothing
-            loop (then' : xs) = do
+        (teardowns, acquisitionFailure) <- acquireAll rup
+        outcome <- case acquisitionFailure of
+            Just rethrow -> return $ Left rethrow
+            Nothing -> (Right <$> (w >>= loop)) `catchAll` (return . Left . throwM)
+        let stepsPassed = either (const False) isNothing outcome
+        teardownFailure <- case lookupOption os of
+            FailFast True | not stepsPassed -> return Nothing
+            _ -> releaseAll teardowns
+        case (outcome, teardownFailure) of
+            (Left rethrow, _) -> rethrow
+            (Right (Just reason), _) -> return $ testFailed reason
+            (Right Nothing, Just rethrow) -> rethrow
+            (Right Nothing, Nothing) -> return $ testPassed ""
+      where
+        loop resultOfWhen = go ts
+          where
+            go [] = return Nothing
+            go (then' : xs) = do
                 liftIO $
                     f
                         ( Progress
                             ""
                             (fromIntegral (length xs) / fromIntegral (length ts))
                         )
-                (then' resultOfWhen >> loop xs)
+                (then' resultOfWhen >> go xs)
                     `catch` (\(EqualityDoesntHold e) -> return (Just e))
-        resultOfThen <- loop ts
-        case resultOfThen of
-            Just reason -> do
-                case lookupOption os of
-                    FailFast False -> teardowns
-                    _ -> return ()
-                return $ testFailed reason
-            Nothing -> teardowns >> return (testPassed "")
     testOptions = Tagged [Option (Proxy :: Proxy FailFast)]
+
+{- | Run the acquisitions in order, stopping at the first that throws.
+Returns the teardowns of the acquired resources, most recent first, and,
+if an acquisition threw, the action rethrowing its exception.
+-}
+acquireAll
+    :: (MonadCatch m)
+    => [TestContext m]
+    -> m ([m ()], Maybe (m Result))
+acquireAll = go []
+  where
+    go held [] = return (held, Nothing)
+    go held (TestContext g a : cs) = do
+        acquired <- (Right <$> g) `catchAll` (return . Left . throwM)
+        case acquired of
+            Left rethrow -> return (held, Just rethrow)
+            Right r -> go (a r : held) cs
+
+{- | Run every teardown in order, even when one throws. Returns the action
+rethrowing the exception of the first teardown that threw, if any.
+-}
+releaseAll :: (MonadCatch m) => [m ()] -> m (Maybe (m Result))
+releaseAll = foldM release Nothing
+  where
+    release first td =
+        (td >> return first)
+            `catchAll` \e -> return $ Just $ fromMaybe (throwM e) first
 
 -- | show a coloured difference of 2 values
 prettyDifferences :: (ToExpr a) => a -> a -> String

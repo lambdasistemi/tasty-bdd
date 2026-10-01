@@ -19,7 +19,7 @@ Change the expectation to 43 and the scenario fails with an equality diagnostic.
 
 ## Set up and tear down resources
 
-`givenAndAfter` returns both a value for later steps and a resource for teardown. `givenAndAfter_` acquires a resource only for teardown. Teardowns run in reverse acquisition order.
+As a test author whose scenario holds real resources — a server, a temporary directory, a database connection — you want every one of them released however the scenario ends. `givenAndAfter` returns both a value for later steps and a resource for teardown. `givenAndAfter_` acquires a resource only for teardown. With the constructor language, `GivenAndAfter` does the same. Teardowns run in reverse acquisition order.
 
 ```mermaid
 sequenceDiagram
@@ -28,9 +28,12 @@ sequenceDiagram
   participant B as Resource B
   S->>A: acquire
   S->>B: acquire
-  S->>S: action and assertions
-  S->>B: release
-  S->>A: release
+  S->>S: action and assertions, pass or fail
+  S->>B: release, even after a failure
+  S->>A: release, even if B's release threw
+  Note over S: reports the step's failure, else a release failure
 ```
 
-The free provider runs recorded teardown on success and caught failure. The constructor provider's fail-fast mode intentionally skips teardown after its equality failure. These existing behaviors differ; choose deliberately. Neither API promises exception-safe resource management for every possible asynchronous exception.
+Both providers release every acquired resource whether the scenario passes, fails an equality assertion, or fails because its action or an assertion throws. When an acquisition throws, the resources acquired before it are released and the scenario fails with the acquisition's exception. A release that throws does not stop the remaining releases. A failed scenario keeps its own failure as the reported reason, even when a release also throws; a scenario whose steps pass but whose release throws is reported failed.
+
+With fail-fast on, the constructor provider skips teardown after a failed scenario, so its resources stay in place for inspection; a passing scenario still releases them. The free provider ignores the fail-fast option. Releases are not masked: neither API promises exception-safe resource management for every possible asynchronous exception.

@@ -6,6 +6,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GADTs #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE Rank2Types #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -75,6 +76,17 @@ catchCJR f = catch f $ asks . Failed
 stepIn :: (MonadCatch m) => m a -> (a -> CJR m) -> CJR m
 stepIn g q = catchCJR (lift g >>= q)
 
+{- | Run a teardown, then the remaining ones even when it throws; the
+first exception is rethrown once all have run.
+-}
+releaseThen :: (MonadCatch m) => m () -> m () -> m ()
+releaseThen release rest =
+    try release >>= \case
+        Right () -> rest
+        Left (e :: SomeException) -> do
+            (_ :: Either SomeException ()) <- try rest
+            throwM e
+
 interpret
     :: forall m. (MonadCatch m) => Language m 'Preparing -> m (BDDResult m)
 interpret y = runReaderT (interpret' y) (return ())
@@ -82,7 +94,7 @@ interpret y = runReaderT (interpret' y) (return ())
     interpret' :: Language m 'Preparing -> CJR m
     interpret' (Given g p) = stepIn g $ interpret' . p
     interpret' (GivenAndAfter g z p) =
-        stepIn g $ \(x, r) -> local (z r >>) $ interpret' $ p x
+        stepIn g $ \(x, r) -> local (releaseThen $ z r) $ interpret' $ p x
     interpret' (When fa p) =
         stepIn fa $ \x -> interpretT' x p
     interpret' (And f g) = do

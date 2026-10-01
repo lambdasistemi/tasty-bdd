@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Release every resource acquired with `GivenAndAfter`, `givenAndAfter` or `givenAndAfter_` when a scenario fails by any exception, in reverse acquisition order. A constructor scenario whose acquisition throws releases the resources acquired before it.
+- Run the remaining teardowns when one throws. A failed scenario keeps its own failure as the reported reason; a scenario whose steps pass but whose teardown throws is reported failed.
+- Fail-fast is unchanged: with it on, a failed constructor scenario still skips teardown.
+
 ## 0.1.0.2 — published
 
 - Verify GHC 9.12.3 support and migrate development from Stack/hpack to Cabal 3.0 and a locked Nix build.
