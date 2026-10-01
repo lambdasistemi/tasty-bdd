@@ -1,10 +1,13 @@
 # Changelog
 
-## Unreleased
+## 0.2.0.0 — not yet on Hackage
 
+- Breaking: `Test.BDD.Language` exports the lens over the action of `BDDTest` as `whenAction` instead of `when`, with the same type, so the module can be imported unqualified next to `Control.Monad`. The record field `_when` is unchanged.
 - Release every resource acquired with `GivenAndAfter`, `givenAndAfter` or `givenAndAfter_` when a scenario fails by any exception, in reverse acquisition order. A constructor scenario whose acquisition throws releases the resources acquired before it.
 - Run the remaining teardowns when one throws. A failed scenario keeps its own failure as the reported reason; a scenario whose steps pass but whose teardown throws is reported failed.
 - Fail-fast is unchanged: with it on, a failed constructor scenario still skips teardown.
+
+Migrating from 0.1: replace each use of the lens `when` with `whenAction`, for example `view when test` becomes `view whenAction test`. A module that hid the lens to use `Control.Monad.when`, such as `import Test.BDD.Language hiding (when)`, can drop the `hiding` clause.
 
 ## 0.1.0.2 — published
 
