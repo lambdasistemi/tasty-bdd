@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.0.0 — not yet on Hackage
+## 0.2.0.0 — published 2026-10-01
 
 - Breaking: `Test.BDD.Language` exports the lens over the action of `BDDTest` as `whenAction` instead of `when`, with the same type, so the module can be imported unqualified next to `Control.Monad`. The record field `_when` is unchanged.
 - Release every resource acquired with `GivenAndAfter`, `givenAndAfter` or `givenAndAfter_` when a scenario fails by any exception, in reverse acquisition order. A constructor scenario whose acquisition throws releases the resources acquired before it.
