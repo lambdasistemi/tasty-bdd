@@ -28,3 +28,5 @@
 - [x] Push the reviewed branch and record CI status and remaining operator steps.
 
 The modernization is pushed to [PR 3](https://github.com/lambdasistemi/tasty-bdd/pull/3). Local checkout/archive gates pass; GitHub CI is tracked on the PR and is not implied green by local results. The authorized ownership transfer is complete and the wiki is published. The operator subsequently requested candidate 0.1.0.2 preparation. PR acceptance and publication remain maintainer steps.
+
+Follow-up: 0.1.0.2 was published on Hackage on 2026-10-01 and tagged `v0.1.0.2`; see the [release page](../../docs/releases.md).
