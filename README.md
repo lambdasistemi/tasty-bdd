@@ -39,6 +39,6 @@ The locked flake uses GHC 9.12.3 on x86_64 Linux. `nix flake check --accept-flak
 
 ## Published package
 
-[Hackage](https://hackage.haskell.org/package/tasty-bdd) carries 0.1.0.0, 0.1.0.1 and 0.1.0.2. GitLab history through January 2025 is retained here, including the source published in 0.1.0.1. [Version 0.1.0.2](https://hackage.haskell.org/package/tasty-bdd-0.1.0.2) was uploaded with documentation on 2026-10-01 and is tagged `v0.1.0.2`. See [how releases are prepared and published](docs/releases.md).
+[Hackage](https://hackage.haskell.org/package/tasty-bdd) carries 0.1.0.0, 0.1.0.1, 0.1.0.2 and 0.2.0.0. GitLab history through January 2025 is retained here, including the source published in 0.1.0.1. [Version 0.1.0.2](https://hackage.haskell.org/package/tasty-bdd-0.1.0.2) was uploaded with documentation on 2026-10-01 and is tagged `v0.1.0.2`. [Version 0.2.0.0](https://hackage.haskell.org/package/tasty-bdd-0.2.0.0), uploaded on 2026-10-01 and tagged `v0.2.0.0`, renames the `when` lens to `whenAction` and releases resources when a scenario fails by exception; see the [changelog](CHANGELOG.md). See [how releases are prepared and published](docs/releases.md).
 
 Licensed under [BSD-3-Clause](LICENSE).
