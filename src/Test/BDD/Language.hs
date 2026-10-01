@@ -41,7 +41,7 @@ module Test.BDD.Language
     , BDDTest (..)
     , TestContext (..)
     , context
-    , when
+    , whenAction
     , tests
     , interpret
     , Phase (..)
@@ -108,13 +108,17 @@ tests
     -> f (BDDTest m t q2)
 tests f (BDDTest ts c w) = (\ts' -> BDDTest ts' c w) <$> f ts
 
--- | Lens for the action whose result is supplied to the assertions.
-when
+{- | Lens for the action whose result is supplied to the assertions.
+
+Named @whenAction@ so that it can be imported unqualified next to
+@Control.Monad.when@.
+-}
+whenAction
     :: (Functor f)
     => (m t -> f (m t))
     -> BDDTest m t q
     -> f (BDDTest m t q)
-when f (BDDTest ts c w) = BDDTest ts c <$> f w
+whenAction f (BDDTest ts c w) = BDDTest ts c <$> f w
 
 -- | Preparing language types
 type BDDPreparing m t q = Language m t q 'Preparing
@@ -130,7 +134,7 @@ interpret (GivenAndAfter given after p) =
     over context ((:) $ TestContext given after) $
         interpret p
 interpret (When fa p) =
-    set when fa $ interpret p
+    set whenAction fa $ interpret p
 interpret (Then ca p) = over tests (ca :) $ interpret p
 interpret End =
     BDDTest [] [] $

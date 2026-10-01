@@ -23,7 +23,7 @@ flowchart LR
   Flake -->|evidence| PR
 ```
 
-The flake's `unit`, `format-check`, `hlint`, `cabal-check`, `workflow-check`, `api-compat`, `hackage-quality` and `docs` apps provide focused checks. `api-compat` loads all four modules from the hash-pinned Hackage 0.1.0.1 source and this checkout under the same GHC, then compares their exported types, constructors, roles and signatures, including `onEach`. The runtime suite separately checks traversal through resources, options, groups and dependencies. This is a source-API check on the locked compiler, not a binary-ABI or full dependency-range guarantee. `nix build .#docs` produces the strict MkDocs site. No Hackage credentials are needed.
+The flake's `unit`, `format-check`, `hlint`, `cabal-check`, `workflow-check`, `api-compat`, `hackage-quality` and `docs` apps provide focused checks. `api-compat` loads all four modules from the hash-pinned Hackage 0.1.0.1 source and this checkout under the same GHC, then compares their exported types, constructors, roles and signatures, including `onEach`. Each module is browsed in its own GHCi session. The only accepted difference from 0.1.0.1 is the lens over the action of `BDDTest`: 0.1.0.1 exports it from `Test.BDD.Language` as `when`, 0.2.0.0 as `whenAction` with the same type. The check applies exactly that rename to the baseline and fails when the baseline lens is not found once, or on any other difference, including `when` still exported. The runtime suite separately checks traversal through resources, options, groups and dependencies. This is a source-API check on the locked compiler, not a binary-ABI or full dependency-range guarantee. `nix build .#docs` produces the strict MkDocs site. No Hackage credentials are needed.
 
 ## Specify a change
 
